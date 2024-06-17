@@ -1,34 +1,29 @@
-import React, { useState } from "react";
-import { IoMdSend } from "react-icons/io";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import { IoMdSend } from 'react-icons/io';
+import styled from 'styled-components';
 
-export default function ChatInput({ handleSendMsg }) {
+const ChatInput = ({ handleSendMsg }) => {
   const [msg, setMsg] = useState('');
 
   const sendChat = (event) => {
     event.preventDefault();
     if (msg.length > 0) {
       handleSendMsg(msg);
-      setMsg("");
+      setMsg('');
     }
   };
 
   return (
     <Container>
       <form className="input-container" onSubmit={sendChat}>
-        <input
-          type="text"
-          placeholder="Type your message here..."
-          onChange={(e) => setMsg(e.target.value)}
-          value={msg}
-        />
+        <input type="text" placeholder="Type your message here..." onChange={(e) => setMsg(e.target.value)} value={msg} />
         <button type="submit">
           <IoMdSend />
         </button>
       </form>
     </Container>
   );
-}
+};
 
 const Container = styled.div`
   display: grid;
@@ -53,7 +48,7 @@ const Container = styled.div`
       font-size: 0.8rem;
 
       &::selection {
-        background-color: #FF9AB2;
+        background-color: #ff9ab2;
       }
       &:focus {
         outline: none;
@@ -73,9 +68,9 @@ const Container = styled.div`
       }
       &:hover {
         background-color: #ff7290;
+      }
     }
-    }
-    
-    }
-  
+  }
 `;
+
+export default ChatInput;

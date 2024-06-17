@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { initiateChatRoute, sendCustomerMessageRoute, receiveCustomerMessageRoute } from '../utils/ApiRoutes';
+import { 
+  initiateChatRoute, 
+  sendCustomerMessageRoute, 
+  receiveCustomerMessageRoute,
+  sendRatingCustomerMessageRoute
+} from '../utils/ApiRoutes';
 
 // Initialize customer chat
 export const initializeCustomerChat = async (name, phone, admin) => {
@@ -20,4 +25,8 @@ export const fetchCustomerMessages = async (conversationId) => {
 // Send customer message
 export const sendCustomerMessage = async (sender, message, adminId) => {
   await axios.post(`${sendCustomerMessageRoute}/${sender}`, { message, adminId });
+};
+
+export const sendCustomerRating = async (chatId, rating, content) => {
+  await axios.post(`${sendRatingCustomerMessageRoute}/${chatId}`, { star: rating, content });
 };

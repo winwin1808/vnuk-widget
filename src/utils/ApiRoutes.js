@@ -3,5 +3,6 @@ export const host = 'http://localhost:5000'
 // Message API Routes
 export const sendCustomerMessageRoute = `${host}/api/customerMessages/sendMessage`;
 export const receiveCustomerMessageRoute = `${host}/api/customerMessages/getMessage`;
+export const sendRatingCustomerMessageRoute = `${host}/api/customerMessages/sendRating`;
 //Initiate chat
 export const initiateChatRoute = `${host}/api/customers/initialize`;
