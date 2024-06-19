@@ -144,7 +144,7 @@ const Messages = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 55%;
+    width: 75%;
     background-color: #eeeeee;
     border-radius: 0.5rem;
     padding: 0.5rem;
@@ -176,7 +176,7 @@ const Messages = styled.div`
 `;
 
 const StyledTextarea = styled.textarea`
-  width: 100%;
+  width: 80%;
   height: 100px;
   margin-bottom: 20px;
   padding: 10px;

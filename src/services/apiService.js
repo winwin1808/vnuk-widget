@@ -3,7 +3,8 @@ import {
   initiateChatRoute, 
   sendCustomerMessageRoute, 
   receiveCustomerMessageRoute,
-  sendRatingCustomerMessageRoute
+  sendRatingCustomerMessageRoute,
+  conversationStatusRoute
 } from '../utils/ApiRoutes';
 
 // Initialize customer chat
@@ -29,4 +30,9 @@ export const sendCustomerMessage = async (sender, message, adminId) => {
 
 export const sendCustomerRating = async (chatId, rating, content) => {
   await axios.post(`${sendRatingCustomerMessageRoute}/${chatId}`, { star: rating, content });
+};
+
+export const getStatusConversation = async (conversationId) => {
+  const response = await axios.get(`${conversationStatusRoute}/${conversationId}`);
+  return response.data;
 };

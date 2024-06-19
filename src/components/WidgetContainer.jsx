@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Widget from './Widget';
 import CustomerForm from './CustomerForm';
 import { useSocketContext } from '../context/socket';
-import { initializeCustomerChat, fetchCustomerMessages, sendCustomerMessage } from '../services/apiService';
+import { initializeCustomerChat, fetchCustomerMessages, sendCustomerMessage, getStatusConversation } from '../services/apiService';
 import moment from 'moment';
 import styled from 'styled-components';
 
@@ -13,83 +13,97 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
   const [customerId, setCustomerId] = useState(localStorage.getItem('customerId'));
   const [conversationId, setConversationId] = useState(localStorage.getItem('conversationId'));
 
+  const fetchMessages = useCallback(async (conversationId, customerId) => {
+    try {
+      const initialMessages = await fetchCustomerMessages(conversationId);
+      const mappedMessages = initialMessages.length > 0 ? initialMessages.map((message) => ({
+        ...message,
+        fromSelf: customerId === message.sender,
+        time: moment(message.createdAt).format('LT'),
+      })) : [{ _id: '1', message: greeting, sender: 'system', fromSelf: false, time: moment().format('LT') }];
+      setMessages(mappedMessages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  }, [greeting]);
+
   useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = (message) => {
-      if (message.sender !== customerId) {
-        setMessages((prevMessages) => [...prevMessages, {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
           ...message,
-          fromSelf: false,
+          fromSelf: message.sender === customerId,
           time: moment(message.createdAt).format('LT'),
-        }]);
-      }
-    };
-
-    const handleSentConfirmation = (message) => {
-      if (message.sender === customerId) {
-        setMessages((prevMessages) => [...prevMessages, {
-          ...message,
-          fromSelf: true,
-          time: moment(message.createdAt).format('LT'),
-        }]);
-      }
+        }
+      ]);
     };
 
     socket.on('newCustomerMessage', handleNewMessage);
-    socket.on('messageSentConfirmation', handleSentConfirmation);
+    socket.on('newAgentMessage', handleNewMessage);
+    socket.on('messageSentConfirmation', handleNewMessage);
 
     return () => {
       socket.off('newCustomerMessage', handleNewMessage);
-      socket.off('messageSentConfirmation', handleSentConfirmation);
+      socket.off('newAgentMessage', handleNewMessage);
+      socket.off('messageSentConfirmation', handleNewMessage);
     };
   }, [socket, customerId]);
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      if (conversationId) {
-        try {
-          const initialMessages = await fetchCustomerMessages(conversationId);
-          if (initialMessages.length > 0) {
-            const mappedMessages = initialMessages.map((message) => ({
-              ...message,
-              fromSelf: customerId === message.sender,
-              time: moment(message.createdAt).format('LT'),
-            }));
-            setMessages(mappedMessages);
-          } else {
-            setMessages([{ _id: '1', message: greeting, sender: 'system', fromSelf: false, time: moment().format('LT') }]);
-          }
+    const checkAndInitializeChat = async () => {
+      if (!customerId || !conversationId) {
+        setIsChatInitialized(false);
+        return;
+      }
+
+      try {
+        const result = await getStatusConversation(conversationId);
+        if (result.isDone) {
+          clearLocalStorage();
+          // Assuming the user will fill the form again
+        } else {
+          await fetchMessages(conversationId, customerId);
           setIsChatInitialized(true);
-        } catch (error) {
-          console.error('Error fetching messages:', error);
         }
+      } catch (error) {
+        clearLocalStorage();
+        setIsChatInitialized(false);
       }
     };
 
-    fetchMessages();
-  }, [conversationId, customerId, greeting]);
+    checkAndInitializeChat();
+  }, [conversationId, customerId, fetchMessages]);
 
   const handleFormSubmit = async (name, phone) => {
     try {
-      const { customerId, conversationId } = await initializeCustomerChat(name, phone, adminId);
-      setCustomerId(customerId);
-      setConversationId(conversationId);
-      localStorage.setItem('customerId', customerId);
-      localStorage.setItem('conversationId', conversationId);
-      setIsChatInitialized(true);
+      const result = await initializeCustomerChat(name, phone, adminId);
+      if (result.customerId && result.conversationId) {
+        const { customerId, conversationId } = result;
+        setLocalStorage(customerId, conversationId);
+        setCustomerId(customerId);
+        setConversationId(conversationId);
+        setIsChatInitialized(true);
+        await fetchMessages(conversationId, customerId);
+      } else {
+        clearLocalStorage();
+        setIsChatInitialized(false);
+      }
     } catch (error) {
-      console.error('Error initializing chat:', error);
+      clearLocalStorage();
+      setIsChatInitialized(false);
     }
   };
 
   const handleSend = async (message) => {
-    const newMessage = { 
-      _id: Date.now().toString(), 
-      message, 
-      sender: customerId, 
-      fromSelf: true, 
-      time: moment().format('LT') 
+    const newMessage = {
+      _id: Date.now().toString(),
+      message,
+      sender: customerId,
+      fromSelf: true,
+      time: moment().format('LT')
     };
 
     if (socket) {
@@ -98,9 +112,27 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
 
     try {
       await sendCustomerMessage(conversationId, message, customerId);
+      await fetchMessages(conversationId, customerId);
     } catch (error) {
-      console.error('Error sending message:', error);
+      if (error.response && error.response.status === 404) {
+        clearLocalStorage();
+        setIsChatInitialized(false);
+      } else {
+        console.error('Error sending message:', error);
+      }
     }
+  };
+
+  const setLocalStorage = (customerId, conversationId) => {
+    localStorage.setItem('customerId', customerId);
+    localStorage.setItem('conversationId', conversationId);
+  };
+
+  const clearLocalStorage = () => {
+    localStorage.removeItem('customerId');
+    localStorage.removeItem('conversationId');
+    setCustomerId(null);
+    setConversationId(null);
   };
 
   if (!isChatInitialized) {
@@ -121,6 +153,8 @@ const Container = styled.div`
   justify-content: center;
   height: 100%;
   font-family: 'Be Vietnam Pro', sans-serif;
+  background-color: #ffffff;
+  border-radius: 1rem;
 `;
 
 export default WidgetContainer;

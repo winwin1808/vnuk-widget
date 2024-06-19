@@ -23,8 +23,8 @@ const ChatContainer = styled.div`
   overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  max-height: 450px;
+  width: 400px;
+  height: 500px;
   font-family: 'Be Vietnam Pro', sans-serif;
 `;
 
