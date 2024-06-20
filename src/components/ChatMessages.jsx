@@ -115,7 +115,7 @@ const Messages = styled.div`
   .message {
     display: flex;
     align-items: center;
-    margin: 0.5rem 0 0 0.5rem;
+    margin: 0.25rem 0.5rem 0 0.5rem ;
     .content {
       max-width: 60%;
       overflow-wrap: break-word;
