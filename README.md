@@ -1,4 +1,3 @@
-
 # VNUK Chatting SDK
 
 A chat widget component built with React.
@@ -8,7 +7,7 @@ A chat widget component built with React.
 To install the package, run the following command:
 
 ```bash
-npm install vnuk-chatting-sdk
+npm install vnukchatting-js
 ```
 
 ## Usage
@@ -17,12 +16,16 @@ To use the chat widget in your project, follow the example below:
 
 ```jsx
 import React from 'react';
-import { WidgetContainer } from 'vnuk-chatting-sdk';
+import { WidgetContainer } from 'vnukchatting-js';
 
 const App = () => {
   return (
     <div>
-      <WidgetContainer greeting="Welcome to our support chat!" />
+      <WidgetContainer 
+        adminId="123321" 
+        greeting="Welcome to our support chat!" 
+        headerName="Customer Support" 
+      />
     </div>
   );
 };
@@ -43,24 +46,15 @@ The package will automatically use the appropriate host based on the `NODE_ENV` 
 
 ## Components
 
-### Widget
-
-The `Widget` component is responsible for rendering the chat interface.
-
-Props:
-
-- `remoteName`: The name of the remote user (default is "TestTest").
-- `messages`: An array of message objects.
-- `onSend`: A function to handle sending messages.
-
 ### WidgetContainer
 
 The `WidgetContainer` component manages the state and logic for the chat widget, including fetching messages and handling new messages.
 
 Props:
 
-- `license`: The license key for the widget (default is an empty string).
-- `greeting`: The initial greeting message (default is "Hello").
+- `adminId`: The ID of the admin to whom the messages will be sent.
+- `greeting`: The initial greeting message (default is "Welcome to our support chat!").
+- `headerName`: The name to display in the chat header (default is "Customer Support").
 
 ## Development
 
