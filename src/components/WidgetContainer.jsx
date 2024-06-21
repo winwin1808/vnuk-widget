@@ -7,7 +7,7 @@ import moment from 'moment';
 import styled from 'styled-components';
 
 const WidgetContainer = ({ greeting, adminId, headerName }) => {
-  const { socket } = useSocketContext();
+  const { socket, setSocketCustomerId } = useSocketContext();
   const [isChatInitialized, setIsChatInitialized] = useState(false);
   const [messages, setMessages] = useState([]);
   const [customerId, setCustomerId] = useState(localStorage.getItem('customerId'));
@@ -87,6 +87,7 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
         setConversationId(conversationId);
         setIsChatInitialized(true);
         await fetchMessages(conversationId, customerId);
+        setSocketCustomerId(customerId); // Update the socket context with the customerId
       } else {
         clearLocalStorage();
         setIsChatInitialized(false);

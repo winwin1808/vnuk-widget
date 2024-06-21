@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import io from 'socket.io-client';
 import { host } from '../utils/ApiRoutes';
 
@@ -10,9 +10,8 @@ export const useSocketContext = () => {
 
 export const SocketContextProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
-    const customerId = localStorage.getItem('customerId');
 
-    useEffect(() => {
+    const setSocketCustomerId = (customerId) => {
         if (customerId) {
             // Initialize socket connection
             const socket = io(host, {
@@ -30,10 +29,10 @@ export const SocketContextProvider = ({ children }) => {
                 setSocket(null);
             };
         }
-    }, [customerId]); // Depend on the customerId to reinitialize the socket if necessary
+    };
 
     return (
-        <SocketContext.Provider value={{ socket }}>
+        <SocketContext.Provider value={{ socket, setSocketCustomerId }}>
             {children}
         </SocketContext.Provider>
     );

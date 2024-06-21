@@ -1,14 +1,29 @@
 import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { SocketContextProvider } from './context/socket';
 import WidgetContainer from './components/WidgetContainer';
 
+// Helper function to get query parameters
+const useQuery = () => {
+  return new URLSearchParams(window.location.search);
+};
+
 const App = () => {
+  const query = useQuery();
+  const adminId = query.get('adminId');
+  const greeting = query.get('greeting');
+  const headerName = query.get('headerName');
+
   return (
-    <div style={{ padding: '20px' }}>
-      <SocketContextProvider>
-        <WidgetContainer greeting="Welcome to our support chat!" adminId="6662d81cb135cb33a0f8e32c" headerName="Customer Support" />
-    </SocketContextProvider>
-    </div>
+    <Router>
+        <SocketContextProvider>
+          <WidgetContainer
+            greeting={greeting}
+            adminId={adminId}
+            headerName={headerName}
+          />
+        </SocketContextProvider>
+    </Router>
   );
 };
 
