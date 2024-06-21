@@ -1,37 +1,42 @@
 {
-  "name": "vnuk-chatting-sdk",
+  "name": "vnukchatting-js",
   "version": "0.1.0",
-  "private": true,
-  "main": "src/index.js",
-  "dependencies": {
-    "@chatscope/chat-ui-kit-react": "^2.0.3",
-    "@chatscope/chat-ui-kit-styles": "^1.4.0",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.4.3",
-    "axios": "^1.4.0",
-    "dotenv": "^16.3.1",
-    "jwt-decode": "^3.1.2",
-    "moment": "^2.30.1",
-    "nanoid": "^4.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-icons": "^5.2.1",
-    "react-router-dom": "^6.23.1",
-    "react-scripts": "^5.0.1",
-    "socket.io-client": "^4.7.5",
-    "styled-components": "^5.3.10",
-    "web-vitals": "^3.3.0"
+  "description": "A React component for chat support with customer and rating features",
+  "main": "dist/index.js",
+  "module": "src/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "webpack --mode production",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+  "dependencies": {
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "jwt-decode": "^3.1.2",
+    "moment": "^2.30.1",
+    "nanoid": "^4.0.0",
+    "react-icons": "^5.2.1",
+    "react-router-dom": "^6.23.1",
+    "socket.io-client": "^4.7.5",
+    "styled-components": "^5.3.10",
+    "web-vitals": "^3.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.16.0",
+    "@babel/preset-react": "^7.24.7",
+    "babel-loader": "^8.3.0",
+    "webpack": "^5.92.0",
+    "webpack-cli": "^4.10.0"
   },
   "eslintConfig": {
     "extends": [
@@ -50,5 +55,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "license": "MIT"
 }

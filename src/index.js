@@ -1,13 +1,4 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import WidgetContainer from './components/WidgetContainer';
+import { SocketContextProvider } from './context/socket';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-
-reportWebVitals();
+export { WidgetContainer, SocketContextProvider };
