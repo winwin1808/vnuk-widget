@@ -29,9 +29,12 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
 
   useEffect(() => {
     const initializeChat = async () => {
+      const name = localStorage.getItem('customerName');
+      const phone = localStorage.getItem('customerPhone');
+      
       if (!customerId || !conversationId) {
         try {
-          const result = await initializeCustomerChat(localStorage.getItem('customerName'), localStorage.getItem('customerPhone'), adminId);
+          const result = await initializeCustomerChat(name, phone, adminId);
           if (result.customerId && result.conversationId) {
             const { customerId, conversationId } = result;
             setLocalStorage(customerId, conversationId);
@@ -59,7 +62,6 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
         const result = await getStatusConversation(conversationId);
         if (result.isDone) {
           clearLocalStorage();
-          setIsChatInitialized(false);
         } else {
           await fetchMessages(conversationId, customerId);
           setIsChatInitialized(true);
@@ -101,6 +103,9 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
 
   const handleFormSubmit = async (name, phone) => {
     try {
+      localStorage.setItem('customerName', name);
+      localStorage.setItem('customerPhone', phone);
+
       const result = await initializeCustomerChat(name, phone, adminId);
       if (result.customerId && result.conversationId) {
         const { customerId, conversationId } = result;
@@ -115,41 +120,36 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
         setIsChatInitialized(false);
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error initializing chat:', error);
       clearLocalStorage();
       setIsChatInitialized(false);
     }
   };
 
   const handleSend = async (message) => {
+    const newMessage = {
+      _id: Date.now().toString(),
+      message,
+      sender: customerId,
+      fromSelf: true,
+      time: moment().format('LT')
+    };
+
+    if (socket) {
+      socket.emit('sendMessage', { ...newMessage, receiver: adminId });
+    }
+
     try {
-      const status = await getStatusConversation(conversationId);
-      if (status.isDone) {
+      await sendCustomerMessage(conversationId, message, customerId);
+      const result = await getStatusConversation(conversationId);
+      if (result.isDone) {
         clearLocalStorage();
         setIsChatInitialized(false);
-        return;
+      } else {
+        await fetchMessages(conversationId, customerId);
       }
-
-      const newMessage = {
-        _id: Date.now().toString(),
-        message,
-        sender: customerId,
-        fromSelf: true,
-        time: moment().format('LT')
-      };
-
-      if (socket) {
-        socket.emit('sendMessage', { ...newMessage, receiver: adminId });
-      }
-
-      await sendCustomerMessage(conversationId, message, customerId);
-      await fetchMessages(conversationId, customerId);
     } catch (error) {
       console.error('Error sending message:', error);
-      if (error.response && error.response.status === 404) {
-        clearLocalStorage();
-        setIsChatInitialized(false);
-      }
     }
   };
 
@@ -161,6 +161,8 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
   const clearLocalStorage = () => {
     localStorage.removeItem('customerId');
     localStorage.removeItem('conversationId');
+    localStorage.removeItem('customerName');
+    localStorage.removeItem('customerPhone');
     setCustomerId(null);
     setConversationId(null);
   };
