@@ -45,6 +45,7 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
             setIsChatInitialized(false);
           }
         } catch (error) {
+          console.error('Error initializing chat:', error);
           clearLocalStorage();
           setIsChatInitialized(false);
         }
@@ -58,11 +59,13 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
         const result = await getStatusConversation(conversationId);
         if (result.isDone) {
           clearLocalStorage();
+          setIsChatInitialized(false);
         } else {
           await fetchMessages(conversationId, customerId);
           setIsChatInitialized(true);
         }
       } catch (error) {
+        console.error('Error checking conversation status:', error);
         clearLocalStorage();
         setIsChatInitialized(false);
       }
@@ -112,6 +115,7 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
         setIsChatInitialized(false);
       }
     } catch (error) {
+      console.error('Error submitting form:', error);
       clearLocalStorage();
       setIsChatInitialized(false);
     }
@@ -141,11 +145,10 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
       await sendCustomerMessage(conversationId, message, customerId);
       await fetchMessages(conversationId, customerId);
     } catch (error) {
+      console.error('Error sending message:', error);
       if (error.response && error.response.status === 404) {
         clearLocalStorage();
         setIsChatInitialized(false);
-      } else {
-        console.error('Error sending message:', error);
       }
     }
   };
