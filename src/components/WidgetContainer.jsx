@@ -118,19 +118,26 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
   };
 
   const handleSend = async (message) => {
-    const newMessage = {
-      _id: Date.now().toString(),
-      message,
-      sender: customerId,
-      fromSelf: true,
-      time: moment().format('LT')
-    };
-
-    if (socket) {
-      socket.emit('sendMessage', { ...newMessage, receiver: adminId });
-    }
-
     try {
+      const status = await getStatusConversation(conversationId);
+      if (status.isDone) {
+        clearLocalStorage();
+        setIsChatInitialized(false);
+        return;
+      }
+
+      const newMessage = {
+        _id: Date.now().toString(),
+        message,
+        sender: customerId,
+        fromSelf: true,
+        time: moment().format('LT')
+      };
+
+      if (socket) {
+        socket.emit('sendMessage', { ...newMessage, receiver: adminId });
+      }
+
       await sendCustomerMessage(conversationId, message, customerId);
       await fetchMessages(conversationId, customerId);
     } catch (error) {
