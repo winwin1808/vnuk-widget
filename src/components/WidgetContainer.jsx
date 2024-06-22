@@ -31,7 +31,7 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
     const initializeChat = async () => {
       const name = localStorage.getItem('customerName');
       const phone = localStorage.getItem('customerPhone');
-      
+      await initializeCustomerChat(name, phone, adminId);
       if (!customerId || !conversationId) {
         try {
           const result = await initializeCustomerChat(name, phone, adminId);
