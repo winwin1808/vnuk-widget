@@ -29,24 +29,39 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
 
   useEffect(() => {
     const initializeChat = async () => {
-      let localCustomerId = customerId;
-      let localConversationId = conversationId;
-
-      try {
-        const result = await initializeCustomerChat(localStorage.getItem('customerName'), localStorage.getItem('customerPhone'), adminId);
-
-        if (result.customerId && result.conversationId) {
-          localCustomerId = result.customerId;
-          localConversationId = result.conversationId;
-
-          setLocalStorage(localCustomerId, localConversationId);
-          setCustomerId(localCustomerId);
-          setConversationId(localConversationId);
-          setSocketCustomerId(localCustomerId); // Initialize the socket connection
+      if (!customerId || !conversationId) {
+        try {
+          const result = await initializeCustomerChat(localStorage.getItem('customerName'), localStorage.getItem('customerPhone'), adminId);
+          if (result.customerId && result.conversationId) {
+            const { customerId, conversationId } = result;
+            setLocalStorage(customerId, conversationId);
+            setCustomerId(customerId);
+            setConversationId(conversationId);
+            setSocketCustomerId(customerId); // Initialize the socket connection
+            await fetchMessages(conversationId, customerId);
+            setIsChatInitialized(true);
+          } else {
+            clearLocalStorage();
+            setIsChatInitialized(false);
+          }
+        } catch (error) {
+          clearLocalStorage();
+          setIsChatInitialized(false);
         }
+      } else {
+        await checkAndInitializeChat();
+      }
+    };
 
-        await fetchMessages(localConversationId, localCustomerId);
-        setIsChatInitialized(true);
+    const checkAndInitializeChat = async () => {
+      try {
+        const result = await getStatusConversation(conversationId);
+        if (result.isDone) {
+          clearLocalStorage();
+        } else {
+          await fetchMessages(conversationId, customerId);
+          setIsChatInitialized(true);
+        }
       } catch (error) {
         clearLocalStorage();
         setIsChatInitialized(false);
