@@ -28,6 +28,50 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
   }, [greeting]);
 
   useEffect(() => {
+    const initializeChat = async () => {
+      if (!customerId || !conversationId) {
+        try {
+          const result = await initializeCustomerChat(localStorage.getItem('customerName'), localStorage.getItem('customerPhone'), adminId);
+          if (result.customerId && result.conversationId) {
+            const { customerId, conversationId } = result;
+            setLocalStorage(customerId, conversationId);
+            setCustomerId(customerId);
+            setConversationId(conversationId);
+            setSocketCustomerId(customerId); // Initialize the socket connection
+            await fetchMessages(conversationId, customerId);
+            setIsChatInitialized(true);
+          } else {
+            clearLocalStorage();
+            setIsChatInitialized(false);
+          }
+        } catch (error) {
+          clearLocalStorage();
+          setIsChatInitialized(false);
+        }
+      } else {
+        await checkAndInitializeChat();
+      }
+    };
+
+    const checkAndInitializeChat = async () => {
+      try {
+        const result = await getStatusConversation(conversationId);
+        if (result.isDone) {
+          clearLocalStorage();
+        } else {
+          await fetchMessages(conversationId, customerId);
+          setIsChatInitialized(true);
+        }
+      } catch (error) {
+        clearLocalStorage();
+        setIsChatInitialized(false);
+      }
+    };
+
+    initializeChat();
+  }, [adminId, conversationId, customerId, fetchMessages, setSocketCustomerId]);
+
+  useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = (message) => {
@@ -52,31 +96,6 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
     };
   }, [socket, customerId]);
 
-  useEffect(() => {
-    const checkAndInitializeChat = async () => {
-      if (!customerId || !conversationId) {
-        setIsChatInitialized(false);
-        return;
-      }
-
-      try {
-        const result = await getStatusConversation(conversationId);
-        if (result.isDone) {
-          clearLocalStorage();
-          // Assuming the user will fill the form again
-        } else {
-          await fetchMessages(conversationId, customerId);
-          setIsChatInitialized(true);
-        }
-      } catch (error) {
-        clearLocalStorage();
-        setIsChatInitialized(false);
-      }
-    };
-
-    checkAndInitializeChat();
-  }, [conversationId, customerId, fetchMessages]);
-
   const handleFormSubmit = async (name, phone) => {
     try {
       const result = await initializeCustomerChat(name, phone, adminId);
@@ -85,9 +104,9 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
         setLocalStorage(customerId, conversationId);
         setCustomerId(customerId);
         setConversationId(conversationId);
+        setSocketCustomerId(customerId); // Initialize the socket connection
         setIsChatInitialized(true);
         await fetchMessages(conversationId, customerId);
-        setSocketCustomerId(customerId); // Update the socket context with the customerId
       } else {
         clearLocalStorage();
         setIsChatInitialized(false);
