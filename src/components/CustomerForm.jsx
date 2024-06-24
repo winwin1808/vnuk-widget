@@ -26,11 +26,14 @@ const FormContainer = styled.form`
   justify-content: center;
   gap: 1rem;
   padding: 2rem;
+  width: 100%;
+  height: 100%;
+  max-height: 550px;
+  overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   background-color: #fff;
-  height: 100%;
-  width: 100%;
+  
   input {
     padding: 0.5rem;
     border-radius: 4px;
