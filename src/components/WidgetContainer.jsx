@@ -31,7 +31,13 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
     const initializeChat = async () => {
       const name = localStorage.getItem('customerName');
       const phone = localStorage.getItem('customerPhone');
-      await initializeCustomerChat(name, phone, adminId);
+
+      if (!name || !phone) {
+        clearLocalStorage();
+        setIsChatInitialized(false);
+        return;
+      }
+
       if (!customerId || !conversationId) {
         try {
           const result = await initializeCustomerChat(name, phone, adminId);
@@ -102,6 +108,11 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
   }, [socket, customerId]);
 
   const handleFormSubmit = async (name, phone) => {
+    if (!name || !phone) {
+      console.error('Name and phone are required to initialize chat');
+      return;
+    }
+
     try {
       localStorage.setItem('customerName', name);
       localStorage.setItem('customerPhone', phone);
@@ -140,13 +151,12 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
     }
 
     try {
-      await sendCustomerMessage(conversationId, message, customerId);
       const result = await getStatusConversation(conversationId);
       if (result.isDone) {
         clearLocalStorage();
         setIsChatInitialized(false);
       } else {
-        await fetchMessages(conversationId, customerId);
+        await sendCustomerMessage(conversationId, message, customerId);
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -173,7 +183,7 @@ const WidgetContainer = ({ greeting, adminId, headerName }) => {
 
   return (
     <Container>
-      <Widget headerName={headerName} messages={messages} onSend={handleSend} chatId={conversationId}/>
+      <Widget headerName={headerName} messages={messages} onSend={handleSend} chatId={conversationId} />
     </Container>
   );
 };
