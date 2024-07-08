@@ -24,6 +24,7 @@ const Widget = ({ headerName, messages, onSend, chatId }) => {
 const ChatContainer = styled.div`
   display: grid;
   grid-template-rows: 10% 80% 10%;
+  width: 100%;
   height: 500px;
   max-height: 550px;
   overflow: hidden;

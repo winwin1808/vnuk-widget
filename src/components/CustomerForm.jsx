@@ -26,9 +26,7 @@ const FormContainer = styled.form`
   justify-content: center;
   gap: 1rem;
   padding: 2rem;
-  width: 100%;
-  height: 100%;
-  max-height: 550px;
+  height: 500px;
   overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
