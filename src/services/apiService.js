@@ -19,7 +19,9 @@ export const initializeCustomerChat = async (name, phone, admin) => {
 
 // Fetch customer messages
 export const fetchCustomerMessages = async (conversationId) => {
-  const response = await axios.post(`${receiveCustomerMessageRoute}/${conversationId}`);
+  const response = await axios.post(`${receiveCustomerMessageRoute}/${conversationId}`,null,{
+    params: { userType: 'customer' }
+  });
   return response.data;
 };
 
